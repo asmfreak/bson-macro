@@ -65,15 +65,15 @@
 #define FIRST(e, ...) e
 #define NOTFIRST1(...) NOTFIRST(__VA_ARGS__)
 #define NOTFIRST(e, ...) __VA_ARGS__
-#define DOCUMENT(len, size, ...) OBSTRUCT(DOCUMENT_IT)(len, size, __VA_ARGS__) '\x0'
+#define DOCUMENT(len, ...) OBSTRUCT(DOCUMENT_IT)(len, 5, __VA_ARGS__) '\x0'
 #define DOCUMENT_IT(len, size, ...) IF(len)(DOCUMENT_BODY, DOCUMENT_HEAD)(len, size, __VA_ARGS__)
 #define DOCUMENT_BODY(len, size, t, k, klen, v, ...) OBSTRUCT(DOCUMENT_III)()(DEC(len), size+EXPAND(FIRST1(EL(t,k,klen,v))), __VA_ARGS__)  NOTFIRST1(EL(t,k,klen,v))
 #define DOCUMENT_III() DOCUMENT_IT
 #define EL(t, k, klen, v) PRIMITIVE_CAT(E, t)(k, klen, v)
 #define DOCUMENT_HEAD(len, size, ...) TO_ENDIANED_ARRAY(((sint32_t){.value=(size)}).string, 4)
 
-#define EINT32(k, klen, v)  sizeof(k)+5, '\x10', TO_ARRAY(k, INC(klen)) TO_ENDIANED_ARRAY(v.string, 4)
-#define EINT64(k, klen, v)  sizeof(k)+5, '\x12', TO_ARRAY(k, INC(klen)) TO_ENDIANED_ARRAY(v.string, 8)
+#define EINT32(k, klen, v)  sizeof(k)+5, '\x10', TO_ARRAY(k, klen)  '\x0', TO_ENDIANED_ARRAY(v.string, 4)
+#define EINT64(k, klen, v)  sizeof(k)+9, '\x12', TO_ARRAY(k, klen) '\x0', TO_ENDIANED_ARRAY(v.string, 8)
 
 #include <stdio.h>
 #include <stdint.h>
@@ -82,15 +82,4 @@
   uint8_t string[sizeof(t)];\
 }
 typedef stringify(int32_t) sint32_t;
-
-int main(){
-    sint32_t sewsa = {.value=0xDEAD};
-    unsigned char a[] = {EVAL(DOCUMENT(2, 0, INT32, "sewsa", 6, sewsa, INT32, "ssaew", 6, sewsa))};
-    //unsigned char a[] = {EVAL(DOCUMENT(1, 0, INT32, "sewsa", 6, sewsa))};
-    for(int i; i<sizeof(a); i++ ){
-      printf("\\x%x ", a[i]);
-    }
-    //for(int i; i<sizeof(a); i++ ){
-    //  printf("%c ", a[i]);
-    //}
-}
+typedef stringify(int64_t) sint64_t;

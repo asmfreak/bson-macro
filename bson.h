@@ -72,10 +72,9 @@
 #define EL(t, k, klen, v) PRIMITIVE_CAT(E, t)(k, klen, v)
 #define DOCUMENT_HEAD(len, size, ...) TO_ENDIANED_ARRAY(((sint32_t){.value=(size)}).string, 4)
 
-#define EINT32(k, klen, v)  sizeof(k)+5, '\x10', TO_ARRAY(k, klen)  '\x0', TO_ENDIANED_ARRAY(v.string, 4)
-#define EINT64(k, klen, v)  sizeof(k)+9, '\x12', TO_ARRAY(k, klen) '\x0', TO_ENDIANED_ARRAY(v.string, 8)
+#define EINT32(k, klen, v)  sizeof(k)+5, '\x10', TO_ARRAY(k, klen)  '\x0', TO_ENDIANED_ARRAY(((sint32_t)v).string, 4)
+#define EINT64(k, klen, v)  sizeof(k)+9, '\x12', TO_ARRAY(k, klen) '\x0', TO_ENDIANED_ARRAY(((sint64_t)v).string, 8)
 
-#include <stdio.h>
 #include <stdint.h>
 #define stringify(t) union{\
   t value;\

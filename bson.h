@@ -1,3 +1,5 @@
+#ifndef __BSON_MACRO_H__
+#define __BSON_MACRO_H__
 #define EMPTY()
 #define DEFER(id) id EMPTY()
 #define OBSTRUCT(...) __VA_ARGS__ DEFER(EMPTY)()
@@ -65,7 +67,7 @@
 #define FIRST(e, ...) e
 #define NOTFIRST1(...) NOTFIRST(__VA_ARGS__)
 #define NOTFIRST(e, ...) __VA_ARGS__
-#define DOCUMENT(len, ...) OBSTRUCT(DOCUMENT_IT)(len, 5, __VA_ARGS__) '\x0'
+#define DOCUMENT(len, ...) EVAL(OBSTRUCT(DOCUMENT_IT)(len, 5, __VA_ARGS__) '\x0')
 #define DOCUMENT_IT(len, size, ...) IF(len)(DOCUMENT_BODY, DOCUMENT_HEAD)(len, size, __VA_ARGS__)
 #define DOCUMENT_BODY(len, size, t, k, klen, v, ...) OBSTRUCT(DOCUMENT_III)()(DEC(len), size+EXPAND(FIRST1(EL(t,k,klen,v))), __VA_ARGS__)  NOTFIRST1(EL(t,k,klen,v))
 #define DOCUMENT_III() DOCUMENT_IT
@@ -82,3 +84,5 @@
 }
 typedef stringify(int32_t) sint32_t;
 typedef stringify(int64_t) sint64_t;
+
+#endif

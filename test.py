@@ -50,7 +50,7 @@ class EncodeTest(unittest.TestCase):
         for k,v in reversed(d.items()):
             t = "INT32" if bytes_needed(v) <= 4 else "INT64"
             r += "{0}, \"{1}\", {2}, {3}, ".format(t, k, len(k), v)
-        return "EVAL(DOCUMENT({0}, {1}))".format(len(d.keys()), r)
+        return "DOCUMENT({0}, {1})".format(len(d.keys()), r)
 
     def make_file(self, of, test_line):
         with open("test.c") as base, open(of, "w") as out:

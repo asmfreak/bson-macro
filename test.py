@@ -9,7 +9,7 @@ from math import log
 def bytes_needed(n):
     if n == 0:
         return 1
-    return int(log(n, 256)) + 1
+    return int(log(abs(n), 256)) + 1
 
 class EncodeTest(unittest.TestCase):
     def setUp(self):
@@ -19,7 +19,8 @@ class EncodeTest(unittest.TestCase):
         self.data = [
             odict([("asas", 20)]),
             odict([("abaiksj", 200), ("kddsokn", 900), ("dsdsojok", 250)]),
-            odict([("k4", 0xDEADBEEFFEED)])
+            odict([("k4", 0xDEADBEEFFEED)]),
+            odict([("k5", -0x0EADBEEFFEED)])
         ]
 
     def tearDown(self):

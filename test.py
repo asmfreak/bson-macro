@@ -56,24 +56,26 @@ class EncodeTest(unittest.TestCase):
         targetc = target + '.c'
         macro = d()
         self.make_file(targetc, macro)
-        check_call([cc, targetc, "-I", os.path.dirname(os.path.abspath(__file__)), "-o", target])
+        c = [ cc, ]
+        if cc=='clang++':
+            c.extend(['-x','c++'])
+        c.extend(["-I", os.path.dirname(os.path.abspath(__file__)), "-o", target, targetc])
+        check_call(c)
 
     def generate_string(self, d):
         r = ""
         for k,v in reversed(d.items()):
             t = "INT32" if bytes_needed(v) <= 4 else "INT64"
-            r += "{0}, \"{1}\", {2}, {3}, ".format(t, k, len(k), v)
+            r += "{0}, {1}, {2}, {3}, ".format(t, k, len(k), v)
         return "BSON_DOCUMENT({0}, {1})".format(len(d.keys()), r)
 
     def make_file(self, of, test_line):
-        with open("test.ctemplate") as base, open(of, "w") as out: #, open("test.ccc", "w") as ff:
+        with open("test.ctemplate") as base, open(of, "w") as out:
             for line in base:
                 if line.startswith("//EDITHERE"):
                     out.write(test_line)
-#                    ff.write(test_line)
                 else:
                     out.write(line)
-#                    ff.write(line)
 
 if __name__ == "__main__":
     unittest.main()

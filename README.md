@@ -19,4 +19,4 @@ int main(){
 ```
 
 ## Acknoledgements
-Big part of `bson.h` was written from [this stackoverflow answer](http://stackoverflow.com/a/7508513)
+Big part of `bson.h` was written from [this stackoverflow answer](http://stackoverflow.com/a/10540654) and [Cloak library](https://github.com/pfultz2/Cloak) by Paul Fultz II.

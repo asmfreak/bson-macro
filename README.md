@@ -17,3 +17,6 @@ int main(){
     uint8_t a[] = {DOCUMENT(2, INT32, val2, 4, val, INT64, val1, 4, 100)};
 }
 ```
+
+## Acknoledgements
+Big part of `bson.h` was written from (this stackoverflow answer)[http://stackoverflow.com/a/7508513]

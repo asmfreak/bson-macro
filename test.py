@@ -52,13 +52,52 @@ class EncodeTest(unittest.TestCase):
                 encoded_c = bytes(bytearray.fromhex(" ".join(encoded_c)))
                 self.assertEqual(d, bson.loads(encoded_c), msg="test decode on {cc} data: {d}".format(cc=cc, d=d))
 
+    def test_verify_decode(self):
+        for cc in self.compilers:
+            for d in self.data:
+                self.make_exe(self.target, lambda: self.generate_mapping(d), cc=cc)
+                check_call([self.target])
+
+    def test_verify_decode_bson(self):
+        for cc in self.compilers:
+            if cc=='g++': 
+                continue
+            for d in self.data:
+                self.make_exe(self.target, lambda: self.generate_mapping(d, own_bson=True), cc=cc)
+                check_call([self.target])
+
+    def generate_mapping(self, d, own_bson=False):
+        fcn = ""
+        vars = ""
+        call = []
+        asserts = ""
+        for k,v in reversed(d.items()):
+            t = "INT32" if bytes_needed(v) <= 4 else "INT64"
+            tt = "int32_t" if bytes_needed(v) <= 4 else "int64_t"
+            fcn += "{0}, {1}, {2}, ".format(t, k, len(k))
+            vars += "{0} {1} = 0;".format(tt, k)
+            call.append("&{0} ".format(k))
+            asserts += "assert({} == {});".format(k, v)
+        fcn = "BSON_VERIFY(msg, {0}, {1})".format(len(d.keys()), fcn)
+        call = "verify_msg(a, sizeof(a), {});".format(",".join(reversed(call)))
+        return {
+            "//EDITVERFCN": fcn,
+            "//EDITDOC": ', '.join(["'\\x{:02x}'".format(x) for x in bson.dumps(d)]) if own_bson else self.generate_string(d),
+            "//EDITVAR": vars,
+            "//EDITVERIFY": call,
+            "//EDITASSERT": asserts
+        }
+
     def make_exe(self, target, d, cc="gcc"):
         targetc = target + '.c'
         macro = d()
-        self.make_file(targetc, macro)
+        if isinstance(macro,str):
+            self.make_file(targetc, macro)
+        else:
+            self.make_file_from_mapping(targetc, macro)
         c = [ cc, ]
         if cc=='clang++':
-            c.extend(['-x','c++'])
+            c.extend(['-x','c++']) #silence annoying warning
         c.extend(["-I", os.path.dirname(os.path.abspath(__file__)), "-o", target, targetc])
         check_call(c)
 
@@ -74,6 +113,15 @@ class EncodeTest(unittest.TestCase):
             for line in base:
                 if line.startswith("//EDITHERE"):
                     out.write(test_line)
+                else:
+                    out.write(line)
+    def make_file_from_mapping(self, of, mapping):
+        with open("test_verify.ctemplate") as base, open(of, "w") as out:
+            for line in base:
+                for tag in mapping:
+                    if line.startswith(tag):
+                        out.write(mapping[tag])
+                        break
                 else:
                     out.write(line)
 

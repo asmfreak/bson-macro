@@ -107,7 +107,7 @@ extern "C" {
 }
 #endif
 
-#define BS_VERIFY(name, len, ...) \
+#define BSON_VERIFY(name, len, ...) \
 uint8_t BS_PRIMITIVE_CAT(verify_, name)(const uint8_t* input, int32_t input_len BS_EVAL(BS_VERARGS(len, __VA_ARGS__))){\
     const int32_t exp_len = BS_EVAL(BS_VERSIZE(len, __VA_ARGS__));\
     const uint8_t exp[] = {BS_EVAL(BS_VERDOC(len, __VA_ARGS__))};\

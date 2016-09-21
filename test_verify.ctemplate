@@ -6,9 +6,9 @@
 
 int main(){
     uint8_t a[] = {
-      //EDITDOC BSON_DOCUMENT(3, INT64, v3, 2, 100500,  INT32, v2, 2, 120, INT64, v1, 2, 0xFEEDDEEF)
+//EDITDOC BSON_DOCUMENT(3, INT64, v3, 2, 100500,  INT32, v2, 2, 120, INT64, v1, 2, 0xFEEDDEEF)
     };
-    //EDITVAR int64_t v3=0;int32_t v2=0;int64_t v1=0;
-    //EDITVERIFY verify_msg(a, sizeof(a), &v1, &v2, &v3);
-    //EDITASSERT assert(v3==100500);assert(v2==120);assert(v1==0xFEEDDEEF);
+//EDITVAR int64_t v3=0;int32_t v2=0;int64_t v1=0;
+//EDITVERIFY verify_msg(a, sizeof(a), &v1, &v2, &v3);
+//EDITASSERT assert(v3==100500);assert(v2==120);assert(v1==0xFEEDDEEF);
 }

@@ -115,6 +115,7 @@ class EncodeTest(unittest.TestCase):
                     out.write(test_line)
                 else:
                     out.write(line)
+
     def make_file_from_mapping(self, of, mapping):
         with open("test_verify.ctemplate") as base, open(of, "w") as out:
             for line in base:

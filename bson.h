@@ -108,6 +108,7 @@ extern "C" {
 #endif
 
 #define BSON_VERIFY(name, len, ...) \
+const int32_t BS_PRIMITIVE_CAT(name,_size) = BS_EVAL(BS_VERSIZE(len, __VA_ARGS__));\
 uint8_t BS_PRIMITIVE_CAT(verify_, name)(const uint8_t* input, int32_t input_len BS_EVAL(BS_VERARGS(len, __VA_ARGS__))){\
     const int32_t exp_len = BS_EVAL(BS_VERSIZE(len, __VA_ARGS__));\
     const uint8_t exp[] = {BS_EVAL(BS_VERDOC(len, __VA_ARGS__))};\
@@ -178,6 +179,12 @@ uint8_t BS_PRIMITIVE_CAT(verify_, name)(const uint8_t* input, int32_t input_len 
 
 typedef stringify(int32_t) sint32_t;
 typedef stringify(int64_t) sint64_t;
+typedef stringify(int16_t) sint16_t;
+
+#define BS_TO_ARRI64(v) BS_EVAL(BS_TO_ENDIANED_ARRAY( ((sint64_t)(int64_t)v).string, 8 ))
+#define BS_TO_ARRI32(v) BS_EVAL(BS_TO_ENDIANED_ARRAY( ((sint32_t)(int32_t)v).string, 4 ))
+#define BS_TO_ARRI16(v) BS_EVAL(BS_TO_ENDIANED_ARRAY( ((sint16_t)(int16_t)v).string, 2 ))
+#define BS_TO_ARRI8(v) (uint8_t)(v),
 
 #ifdef __cplusplus
 }

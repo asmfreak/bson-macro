@@ -16,7 +16,7 @@ extern "C" {
 #define BS_CAT(a, ...) BS_PRIMITIVE_CAT(a, __VA_ARGS__)
 #define BS_PRIMITIVE_CAT(a, ...) a ## __VA_ARGS__
 
-#define BS_INC(x) BS_PRIMITIVE_CAT(BS_INC_, x) 
+#define BS_INC(x) BS_PRIMITIVE_CAT(BS_INC_, x)
 #define BS_INC_0 1
 #include "inc.h"
 
@@ -86,10 +86,17 @@ extern "C" {
   sizeof(k)+5, '\x10', \
   BS_TO_ARRAY(k, klen)  '\x0', \
   BS_TO_ENDIANED_ARRAY(((sint32_t)(int32_t)v).string, 4)
+
 #define BS_EINT64(k, klen, v)  \
   sizeof(k)+9, '\x12', \
   BS_TO_ARRAY(k, klen) '\x0', \
   BS_TO_ENDIANED_ARRAY(((sint64_t)(int64_t)v).string, 8)
+
+#define BS_EDOC(k, klen, sz, __VA_ARGS__)  \
+  sizeof(k)+sz, '\x12', \
+  BS_TO_ARRAY(k, klen) '\x0', \
+
+
 
 #define BS_EDIND(k) sizeof(k)+1
 

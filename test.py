@@ -3,7 +3,7 @@ import tempfile
 import unittest
 import bson
 from collections import OrderedDict as odict
-from subprocess import check_call, check_output
+from subprocess import check_call, check_output, CalledProcessError, STDOUT
 from math import log
 
 def bytes_needed(n):
@@ -12,6 +12,8 @@ def bytes_needed(n):
     return int(log(abs(n), 256)) + 1
 
 class EncodeTest(unittest.TestCase):
+    _multiprocess_can_split_ = True
+
     def setUp(self):
         self._tempdir = tempfile.TemporaryDirectory()
         self.dir = self._tempdir.name
@@ -60,13 +62,30 @@ class EncodeTest(unittest.TestCase):
 
     def test_verify_decode_bson(self):
         for cc in self.compilers:
-            if cc=='g++': 
+            if cc=='g++':
                 continue
             for d in self.data:
                 self.make_exe(self.target, lambda: self.generate_mapping(d, own_bson=True), cc=cc)
                 check_call([self.target])
 
-    def generate_mapping(self, d, own_bson=False):
+    def test_err_verify_decode_bson(self):
+        for cc in self.compilers:
+            if cc=='g++':
+                continue
+            for ind, d in enumerate(self.data):
+                self.make_exe(
+                    self.target,
+                    lambda: self.generate_mapping(
+                        d,
+                        another_d=self.data[
+                           ind+1 if ind != len(self.data)-1 else 0
+                        ]),
+                    cc=cc)
+                with self.assertRaises(CalledProcessError):
+                    with open(os.devnull, "w") as devnull:
+                        check_call([self.target], stdout=devnull, stderr=STDOUT)
+
+    def generate_mapping(self, d, own_bson=False, another_d=None):
         fcn = ""
         vars = ""
         call = []
@@ -80,9 +99,13 @@ class EncodeTest(unittest.TestCase):
             asserts += "assert({} == {});".format(k, v)
         fcn = "BSON_VERIFY(msg, {0}, {1})".format(len(d.keys()), fcn)
         call = "verify_msg(a, sizeof(a), {});".format(",".join(reversed(call)))
+        d = another_d if another_d else d
         return {
             "//EDITVERFCN": fcn,
-            "//EDITDOC": ', '.join(["'\\x{:02x}'".format(x) for x in bson.dumps(d)]) if own_bson else self.generate_string(d),
+            "//EDITDOC":
+                ', '.join(["'\\x{:02x}'".format(x) for x in bson.dumps(d)])
+                if own_bson
+                else self.generate_string(d),
             "//EDITVAR": vars,
             "//EDITVERIFY": call,
             "//EDITASSERT": asserts

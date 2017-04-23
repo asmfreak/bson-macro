@@ -52,6 +52,12 @@ extern "C" {
 )
 #define BS_REPEAT_INDIRECT() BS_REPEAT
 
+#define BS_FOR(count, macro, el, ...) BS_WHEN(count)(\
+    BS_OBSTRUCT(macro)(BS_DEC(count), el)\
+    BS_OBSTRUCT(BS_FOR_INDIRECT) () (BS_DEC(count), macro, __VA_ARGS__) \
+)
+#define BS_FOR_INDIRECT() BS_FOR
+
 #define BS_TO_ARRAY_EL(i, v) v[i],
 #define BS_TO_ARRAY(v, len) BS_REPEAT(len, BS_TO_ARRAY_EL, v)
 
@@ -82,6 +88,18 @@ extern "C" {
 #define BS_EL(t, k, klen, v) BS_PRIMITIVE_CAT(BS_E, t)(#k, klen, v)
 #define BS_DOCUMENT_HEAD(len, size, ...) BS_TO_ENDIANED_ARRAY(((sint32_t)(int32_t)(size)).string, 4)
 
+#define BSON_DOCUMENT_SIZE(len, ...) BS_EVAL(BS_OBSTRUCT(BS_DOCUMENT_SIZE_IT)(len, 5, __VA_ARGS__))
+#define BS_DOCUMENT_SIZE_IT(len, size, ...) BS_IF(len)(BS_DOCUMENT_SIZE_BODY, BS_DOCUMENT_SIZE_HEAD)(len, size, __VA_ARGS__)
+#define BS_DOCUMENT_SIZE_BODY(len, size, t, k, klen, ...) \
+  BS_OBSTRUCT(\
+    BS_DOCUMENT_SIZE_III)()(BS_DEC(len), \
+    size+BS_EXPAND(BS_FIRST1(BS_EL(t,k,klen, ))), \
+    __VA_ARGS__\
+  )
+#define BS_DOCUMENT_SIZE_III() BS_DOCUMENT_SIZE_IT
+#define BS_DOCUMENT_SIZE_HEAD(len, size, ...) (size)
+
+
 #define BS_EINT32(k, klen, v)  \
   sizeof(k)+5, '\x10', \
   BS_TO_ARRAY(k, klen)  '\x0', \
@@ -92,7 +110,7 @@ extern "C" {
   BS_TO_ARRAY(k, klen) '\x0', \
   BS_TO_ENDIANED_ARRAY(((sint64_t)(int64_t)v).string, 8)
 
-#define BS_EDOC(k, klen, sz, __VA_ARGS__)  \
+#define BS_EDOC(k, klen, sz, ...)  \
   sizeof(k)+sz, '\x12', \
   BS_TO_ARRAY(k, klen) '\x0', \
 
@@ -177,6 +195,7 @@ uint8_t BS_PRIMITIVE_CAT(verify_, name)(const uint8_t* input, int32_t input_len 
 #define BS_VERIND(len, ...) BS_IF(len)(BS_VERIND_II, BS_EAT)(len, __VA_ARGS__)
 #define BS_VERIND_II(len, t, k, klen, ...) BS_VERSIZE(BS_DEC(len), __VA_ARGS__)-1+BS_EDIND(#k),  BS_OBSTRUCT(BS_VERIND_III)()(BS_DEC(len), __VA_ARGS__)
 #define BS_VERIND_III() BS_VERIND
+#define BSON_DOCUMENT_INDEXES(...) BS_EVAL(BS_VERIND(__VA_ARGS__))
 
 #define BS_VERTYPE(len, ...) BS_IF(len)(BS_VERTYPE_I, BS_EAT)(len, __VA_ARGS__)
 #define BS_VERTYPE_I(len, t, k, klen, ...) BS_PRIMITIVE_CAT(BS_VERTYPE_,t), BS_OBSTRUCT(BS_VERTYPE_II)()(BS_DEC(len),__VA_ARGS__)
